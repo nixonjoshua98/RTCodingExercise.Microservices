@@ -1,0 +1,148 @@
+﻿@using System.Globalization
+@using HttpClients.Catalog.Contracts
+@using HttpClients.Catalog.Contracts.Enumerations
+@using WebMVC.Abstractions
+@using Microsoft.Extensions.Configuration;
+
+@model PlatesListingViewModel
+
+@inject IPlateFilterOptionsProvider _filterOptions
+@inject IConfiguration _configuration
+
+@{
+    ViewData["Title"] = "Plates Listing";
+}
+
+<div class="modal fade" id="error-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Server Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="error-modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+
+    <div id="total-revenue-container" class="d-flex justify-content-end mb-2 input-group d-none">
+        <span class="input-group-text">Total Revenue:</span>
+        <span class="input-group-text">
+            <span>£</span>
+            <span id="total-revenue-text"></span>
+        </span>
+    </div>
+
+    <div class="card">
+        <form method="get" class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                    <input type="text"
+                           name="query"
+                           class="form-control d-inline w-auto"
+                           value="@Model.Query"
+                           placeholder="Search query"
+                           maxlength="64" />
+
+                    <input type="text"
+                           id="discount-code-input"
+                           name="discountCode"
+                           class="form-control d-inline w-auto"
+                           value="@Model.DiscountCode"
+                           placeholder="Discount code"
+                           maxlength="64" />
+
+                    <label for="sort" class="me-2 mb-0">Sort by</label>
+                    <select id="sort" name="sort" class="form-select d-inline w-auto">
+                        @foreach (var sort in _filterOptions.GetSortOptions())
+                        {
+                            <option value="@sort.Value" selected="@(sort.Value == Model.Sort ? "selected" : null)">
+                                @sort.DisplayName
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <table class="table table-sm table-striped">
+        <thead>
+            <tr>
+                <th class="text-center">Registration</th>
+                <th class="text-center">Purchase price</th>
+                <th class="text-center">Sale price</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var plate in Model.Plates)
+            {
+                <tr>
+                    <td class="text-center">@plate.Registration</td>
+                    <!-- CultureInfo.CurrentCulture - Doesn't display the pound sign, I use a US layout which I think is upsetting it -->
+                    <td class="text-center">@plate.PurchasePrice.ToString("C", new CultureInfo("en-GB"))</td>
+                    <td class="text-center">@plate.SalePrice.ToString("C", new CultureInfo("en-GB"))</td>
+                    <td class="text-center td-w-10rem">
+                        <div class="btn-group">
+                            <button id="reserve-plate-@plate.Id" 
+                                    type="button" 
+                                    class="btn btn-sm btn-outline-primary" 
+                                    onclick="reservePlate('@plate.Id', 'reserve-plate-@plate.Id')"
+                                    disabled="@(plate.Availablity != PlateAvailablity.Unreserved)">
+                                    Reserve
+                            </button>
+                            <button id="sell-plate-@plate.Id" 
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary"
+                                    onclick="sellPlate('@plate.Id', 'sell-plate-@plate.Id', 'reserve-plate-@plate.Id')"
+                                    disabled="@(plate.Availablity == PlateAvailablity.Sold)">
+                                @(plate.Availablity == PlateAvailablity.Sold ? "Sold" : "Sell plate")
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4 gap-2">
+        @if (Model.Page > 0)
+        {
+            <a class="btn btn-outline-secondary" href="?page=@(Model.Page - 1)&sort=@Model.Sort">Previous</a>
+        }
+        else
+        {
+            <span class="btn btn-outline-secondary disabled">Previous</span>
+        }
+
+        <span class="align-self-center px-3">Page @(Model.Page + 1)</span>
+
+        @if (Model.HasMore)
+        {
+            <a class="btn btn-outline-primary" href="?page=@(Model.Page + 1)&sort=@Model.Sort">Next</a>
+        }
+        else
+        {
+            <span class="btn btn-outline-primary disabled">Next</span>
+        }
+    </div>
+
+</div>
+
+<script>
+    const VIEW_BAG = {
+        catalogBaseUrl: '@_configuration["CatalogApi:ExternalBaseUrl"]'
+    };
+</script>

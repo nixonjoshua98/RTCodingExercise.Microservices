@@ -1,4 +1,7 @@
-﻿using MassTransit;
+﻿using Catalog.API.Abstractions;
+using Catalog.API.Endpoints;
+using Catalog.API.Services;
+using MassTransit;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
 
@@ -16,6 +19,10 @@ namespace Catalog.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services
+                .AddScoped<IPlatesService, PlatesService>()
+                .AddScoped<IDiscountCodeService, DiscountCodeService>();
+
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(Configuration["ConnectionString"],
@@ -119,8 +126,7 @@ namespace Catalog.API
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDefaultControllerRoute();
-                endpoints.MapControllers();
+                endpoints.MapPlatesEndpoints();
             });
         }
     }

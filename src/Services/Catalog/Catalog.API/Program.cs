@@ -1,3 +1,8 @@
+
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Catalog.UnitTests")]
+
 string Namespace = typeof(Startup).Namespace;
 string AppName = Namespace.Substring(Namespace.LastIndexOf('.', Namespace.LastIndexOf('.') - 1) + 1);
 

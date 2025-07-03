@@ -36,7 +36,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Services\Catalog\Catalog.Domain\Catalog.Domain.csproj" />
+	  <ProjectReference Include="..\..\BuildingBlocks\HttpClients.Catalog\HttpClients.Catalog.csproj" />
 	</ItemGroup>
 
 </Project>

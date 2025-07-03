@@ -13,7 +13,6 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Polly;
 global using RTCodingExercise.WebMVC;
-global using Catalog.Domain;
 global using Serilog;
 global using System;
 global using System.Collections.Generic;

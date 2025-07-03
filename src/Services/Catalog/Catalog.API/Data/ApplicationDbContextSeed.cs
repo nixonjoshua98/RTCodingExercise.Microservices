@@ -10,7 +10,9 @@ namespace Catalog.API.Data
 
             try
             {
-                await SeedCustomData(context, env, logger);
+                await SeedDiscountCodesAsync(context, logger);
+
+                await SeedPlatesAsync(context, env, logger);
             }
             catch (Exception ex)
             {
@@ -26,7 +28,26 @@ namespace Catalog.API.Data
             }
         }
 
-        public async Task SeedCustomData(ApplicationDbContext context, IWebHostEnvironment env, ILogger<ApplicationDbContextSeed> logger)
+        public async Task SeedDiscountCodesAsync(ApplicationDbContext context, ILogger<ApplicationDbContextSeed> logger)
+        {
+            try
+            {
+                await context.DiscountCodes.AddRangeAsync(new DiscountCode[]
+                {
+                     new DiscountCode { Id = Guid.Parse("7C88B586-AABA-400A-8EF2-AF2073FC0CB2"), Code = "DISCOUNT", Type = DiscountCodeType.Value, Value = 25 },
+                     new DiscountCode { Id = Guid.Parse("C3AAE272-56E3-4DB3-80E2-E4C686820EAA"), Code = "PERCENTOFF", Type = DiscountCodeType.Percentage, Value = 0.15m }
+                });
+
+                await context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.Message, ex);
+                throw;
+            }
+        }
+
+        public async Task SeedPlatesAsync(ApplicationDbContext context, IWebHostEnvironment env, ILogger<ApplicationDbContextSeed> logger)
         {
             try
             {

@@ -16,3 +16,7 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.td-w-10rem {
+    width: 10rem !important;
+}
